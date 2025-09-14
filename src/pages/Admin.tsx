@@ -33,7 +33,7 @@ const Admin = () => {
   const loadProducts = async () => {
     try {
       setLoading(true);
-      const data = await productService.getAllProducts();
+        const data = await instance.get('/products').then(res => res.data);
       setProducts(data);
     } catch (error) {
       toast({
@@ -68,7 +68,7 @@ const Admin = () => {
   const handleCreateProduct = async (productData: Omit<Product, 'id'>) => {
     try {
       const newProduct = await instance.post('/products', productData).then(res => res.data);
-      // const newProduct = await productService.createProduct(productData);
+      loadProducts();
       toast({
         title: "Produto criado com sucesso!",
         description: `${newProduct.name} foi adicionado ao catálogo.`,
@@ -84,7 +84,7 @@ const Admin = () => {
 
   const handleEditProduct = async (id: number, productData: Partial<Product>) => {
     try {
-      const updatedProduct = await productService.updateProduct(id, productData);
+      const updatedProduct = await instance.put(`/products/${id}`, productData).then(res => res.data);
       if (updatedProduct) {
         setProducts(prev => prev.map(p => p.id === id ? updatedProduct : p));
         setIsModalOpen(false);
@@ -105,9 +105,10 @@ const Admin = () => {
 
   const handleDeleteProduct = async (id: number) => {
     try {
-      const success = await productService.deleteProduct(id);
+      const success = await instance.delete(`/products/${id}`).then(res => res.status === 200);
+
+      setProducts(prev => prev.filter(p => p.id !== id));
       if (success) {
-        setProducts(prev => prev.filter(p => p.id !== id));
         toast({
           title: "Produto excluído!",
           description: "O produto foi removido do catálogo.",
@@ -136,6 +137,8 @@ const Admin = () => {
   const totalValue = products.reduce((sum, product) => sum + product.price, 0);
   const newProducts = products.filter(p => p.isNew).length;
   const saleProducts = products.filter(p => p.isSale).length;
+
+  console.log(products);
 
   return (
     <div className="min-h-screen bg-background">
