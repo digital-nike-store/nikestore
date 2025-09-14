@@ -10,6 +10,7 @@ import { Product } from "@/types/Product";
 import ProductTable from "@/components/admin/ProductTable";
 import ProductFormModal from "@/components/admin/ProductFormModal";
 import { useToast } from "@/hooks/use-toast";
+import { instance } from "@/instance/instance";
 
 const Admin = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -66,9 +67,8 @@ const Admin = () => {
 
   const handleCreateProduct = async (productData: Omit<Product, 'id'>) => {
     try {
-      const newProduct = await productService.createProduct(productData);
-      setProducts(prev => [...prev, newProduct]);
-      setIsModalOpen(false);
+      const newProduct = await instance.post('/products', productData).then(res => res.data);
+      // const newProduct = await productService.createProduct(productData);
       toast({
         title: "Produto criado com sucesso!",
         description: `${newProduct.name} foi adicionado ao catálogo.`,
