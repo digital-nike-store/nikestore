@@ -1,8 +1,20 @@
 import ProductCard from "@/components/ui/product-card";
 import { Button } from "@/components/ui/button";
 import { nikeProducts } from "@/data/products";
+import { useEffect, useState } from "react";
+import { instance } from "@/instance/instance";
 
 const ProductGrid = () => {
+  const [products, setProducts] = useState<any[]>([]);
+
+  useEffect(() => {
+    async function fetchNikeProducts() {
+      const dataProducts = await instance.get('/products')
+        .then(res => setProducts(res.data));
+      console.log(dataProducts);
+    }
+    fetchNikeProducts();
+  }, []);
   return (
     <section className="py-20 bg-gradient-hero">
       <div className="container mx-auto px-4">
@@ -18,7 +30,7 @@ const ProductGrid = () => {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-          {nikeProducts.map((product) => (
+          {products.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
         </div>
