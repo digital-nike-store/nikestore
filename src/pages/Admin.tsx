@@ -134,7 +134,7 @@ const Admin = () => {
   };
 
   const categories = [...new Set(products.map(p => p.category))];
-  const totalValue = products.reduce((sum, product) => sum + product.price, 0);
+  const totalValue = products.reduce((sum, product) => sum + Number(product.price), 0);
   const newProducts = products.filter(p => p.isNew).length;
   const saleProducts = products.filter(p => p.isSale).length;
 
@@ -207,7 +207,7 @@ const Admin = () => {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                R$ {totalValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                {totalValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
               </div>
               <p className="text-xs text-muted-foreground">
                 Valor do estoque
