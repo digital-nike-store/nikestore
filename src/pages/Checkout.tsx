@@ -9,6 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { useCart } from "@/contexts/CartContext";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { instance } from "@/instance/instance";
 
 interface ShippingForm {
   fullName: string;
@@ -128,6 +129,17 @@ const Checkout = () => {
     }
   };
 
+  async function envioEmail() {
+    const dados = await instance.post('email', {
+      email: shippingForm.email,
+      parcelas: paymentForm.installments,
+      name: items[0].name,
+      price: items[0].price,
+      frete: shippingCost
+    });
+    console.log(dados); 
+  }
+
   if (items.length === 0) {
     return (
       <div className="min-h-screen bg-gradient-hero flex items-center justify-center">
@@ -176,6 +188,11 @@ const Checkout = () => {
     }
   }, [ shippingForm.cep, toast]);
 
+  // console.log('email: ',  shippingForm.email);
+  // console.log('parcelas: ', paymentForm.installments);
+  // console.log('name: ', items[0].name);
+  // console.log('preço: ', items[0].price);
+  // console.log('frete: ', shippingCost);
   return (
     <div className="min-h-screen bg-gradient-hero py-12">
       <div className="container mx-auto px-4 max-w-6xl">
@@ -437,6 +454,7 @@ const Checkout = () => {
                       size="lg" 
                       className="flex-1"
                       disabled={isProcessing}
+                      onClick={envioEmail}
                     >
                       {isProcessing ? "Processando..." : "Finalizar Compra"}
                     </Button>
