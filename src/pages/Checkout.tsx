@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ArrowLeft, CreditCard, Truck, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -21,6 +21,7 @@ interface ShippingForm {
   neighborhood: string;
   city: string;
   state: string;
+  estado: string;
 }
 
 interface PaymentForm {
@@ -49,7 +50,8 @@ const Checkout = () => {
     complement: "",
     neighborhood: "",
     city: "",
-    state: ""
+    state: "",
+    estado: ""
   });
 
   const [paymentForm, setPaymentForm] = useState<PaymentForm>({
@@ -139,6 +141,40 @@ const Checkout = () => {
       </div>
     );
   }
+
+  useEffect(() => {
+    function getCepData(cep: string) {
+      return fetch(`https://viacep.com.br/ws/${cep.replace(/\D/g, '')}/json/`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.erro) {
+            throw new Error("CEP não encontrado");
+          }
+          return data;
+        });
+    }
+
+    if (shippingForm.cep.length === 8) {
+      getCepData(shippingForm.cep)
+        .then(data => {
+          setShippingForm(prev => ({
+            ...prev,
+            street: data.logradouro || "",
+            neighborhood: data.bairro || "",
+            city: data.localidade || "",
+            uf: data.uf || "",
+            estado: data.estado || ""
+          }));
+        })
+        .catch(() => {
+          toast({
+            title: "CEP inválido",
+            description: "Não foi possível encontrar o endereço para o CEP informado.",
+            variant: "destructive",
+          });
+        });
+    }
+  }, [ shippingForm.cep, toast]);
 
   return (
     <div className="min-h-screen bg-gradient-hero py-12">
@@ -283,7 +319,13 @@ const Checkout = () => {
 
                   <div>
                     <Label htmlFor="state">Estado *</Label>
-                    <Select value={shippingForm.state} onValueChange={(value) => setShippingForm({...shippingForm, state: value})}>
+                    <Input
+                        id="city"
+                        value={shippingForm.estado}
+                        onChange={(e) => setShippingForm({...shippingForm, state: e.target.value})}
+                        placeholder="Estado"
+                      />
+                    {/* <Select value={shippingForm.state} onValueChange={(value) => setShippingForm({...shippingForm, state: value})}>
                       <SelectTrigger>
                         <SelectValue placeholder="Selecione o estado" />
                       </SelectTrigger>
@@ -295,7 +337,7 @@ const Checkout = () => {
                         <SelectItem value="PR">Paraná</SelectItem>
                         <SelectItem value="SC">Santa Catarina</SelectItem>
                       </SelectContent>
-                    </Select>
+                    </Select> */}
                   </div>
 
                   <Button type="submit" variant="elegant" size="lg" className="w-full">
